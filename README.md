@@ -33,7 +33,7 @@ The source R code for the package is in the [**code**](https://github.com/SOCR/S
 Team
 ====
 
-[SOCR Team](https://www.socr.umich.edu/people/) including **Shihang Li**, Yongxiang Zhao, Simeone Marino, and [Ivo D. Dinov](https://umich.edu/~dinov), and others.
+[SOCR Team](https://www.socr.umich.edu/people/) including **Shihang Li**, Yongxiang Zhao, Simeone Marino, [Ivo D. Dinov](https://umich.edu/~dinov), and others.
 
 Acknowledgments
 ===============
