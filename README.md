@@ -82,7 +82,7 @@ This section introduces few parts that can be improved inthe future
 Team
 ====
 
-[SOCR Team](https://www.socr.umich.edu/people/) including **Shihang Li**, Yongxiang Zhao, Author: Yanghe Liu, Simeone Marino, [Ivo D. Dinov](https://umich.edu/~dinov), and others.
+[SOCR Team](https://www.socr.umich.edu/people/) including **Shihang Li**, Yongxiang Zhao, **Yanghe Liu**, Simeone Marino, [Ivo D. Dinov](https://umich.edu/~dinov), and others.
 
 Acknowledgments
 ===============
