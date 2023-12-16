@@ -40,13 +40,6 @@ library(ggstatsplot)
 # Fix font of CJK
 library(showtext)
 
-# Install missing packages
-list.of.packages <- c("htmltools")
-new.packages <- 
-  list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(new.packages)
-
-# User Interface
 ui <- shinyUI(fluidPage(
   
   dashboardPage(
@@ -62,7 +55,6 @@ ui <- shinyUI(fluidPage(
         menuItem("Decision Tree", tabName= "DT",icon=icon("users",lib="font-awesome")),
         menuItem("Hierarchal Clustering", tabName= "HC",icon=icon("users",lib="font-awesome")),
         menuItem("Poisson Clustering", tabName= "PC",icon=icon("users",lib="font-awesome")),
-        menuItem("Binomial Clustering", tabName= "BC",icon=icon("users",lib="font-awesome")),
         menuItem("1-way ANOVA Computation", tabName="AC", icon=icon("users", lib="font-awesome")),
         menuItem("ANOVA Pairwise Comparison", tabName="APC", icon=icon("users", lib="font-awesome")),
         menuItem("Clustered Results", tabName = "Cluster_Result",icon=icon("table")),

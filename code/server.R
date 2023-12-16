@@ -434,100 +434,6 @@ server <- shinyServer(function(input, output, session){
   )
   
   #----------------------------------------------------------------------------------------------
-  # Binomial
-  data_binomial_result <- reactive({
-    data_input <- df() 
-    
-    validate(
-      need(ncol(data_input) >= 2, "Need at least two columns in dataset!")
-    )
-    validate(
-      need("No.Success" %in% colnames(data_input) && "No.Failure" %in% colnames(data_input),
-           "The dataset must contain columns named 'No.Success' and 'No.Failure'!")
-    )
-    
-    if (input$BC_plot == "2D") {
-      validate(
-        need(input$inSelect_BC != input$inSelect2_BC, "Choose different columns of dataset!"),
-        need(input$inSelect0_BC != input$inSelect_BC, "Choose different columns of dataset!")
-      )
-      data_for_clustering <- data.frame(X1 = data_input[[cbind(input$inSelect0_BC,input$inSelect_BC - input$inSelect0_BC)]], X2 = data_input[[input$inSelect2_BC]], X4 = data_input[[input$inSelect4_BC]])
-      
-    } else {
-      validate(
-        need(input$inSelect0_BC != input$inSelect_BC && input$inSelect_BC != input$inSelect2_BC && input$inSelect_BC != input$inSelect3_BC && input$inSelect2_BC != input$inSelect3_BC, "Choose different columns of dataset!")
-      )
-      data_for_clustering <- data.frame(X1 = data_input[[cbind(input$inSelect0_BC,input$inSelect_BC - input$inSelect0_BC)]], X2 = data_input[[input$inSelect2_BC]], X3 = data_input[[input$inSelect3_BC]], X4 = data_input[[input$inSelect4_BC]])
-    }
-    
-    # Using flexmix for clustering
-    betaMix <- flexmix(X1 ~ 1 | X2, data = data_for_clustering, k = input$clustnum_PC, model = FLXMRglm(family = 'binomial', fixed = ~X4))
-    #string <- str(model)
-    #clus_sizes <- data.frame(string@size)
-    #colnames(clus_sizes) <- c("size")
-    #clus_sizes$ID <- seq.int(nrow(clus_sizes))
-    
-    #cluster_assignments <- clusters(clus_sizes)
-    #data_for_clustering$cluster <- factor(cluster_assignments)
-    
-    return(betaMix)
-  })
-  output$clusterchart_BC <- renderPlot({
-    # Create a plot based on your betaMix model
-    # You can customize the plot as needed
-    betaMix <- data_binomial_result()
-    plot(betaMix)
-  })
-  
-  #output$clusterchart_BC <- 
-    #renderPlot({
-    #data_to_plot <- plot(data_binomial_result())
-    
-    #if (input$BC_plot == "2D") {
-    #  p <- plot_ly(data = data_to_plot, x = ~X1, y = ~X2, color = ~cluster, type = "scatter", mode = "markers", marker = list(size = 10)) %>%
-    #    layout(title = "2D Clustering using flexmix", xaxis = list(title = input$inSelect_BC), yaxis = list(title = input$inSelect2_BC))
-    #  
-    #} else {
-    #  p <- plot_ly(data = data_to_plot, x = ~X1, y = ~X2, z = ~X3, color = ~cluster, type = "scatter3d", mode = "markers", marker = list(size = 10)) %>%
-    #    layout(scene = list(xaxis = list(title = input$inSelect_BC), yaxis = list(title = input$inSelect2_BC), zaxis = list(title = input$inSelect3_BC)))
-    #}
-    
-    #return(data_to_plot)
-    
-  #})
-  
-  # PC download result
-  output$BC_downloadResult <- downloadHandler(
-    filename = function() {
-      paste("Binomial-result-", Sys.Date(), ".csv", sep="")
-    },
-    content = function(file) {
-      write.csv(data_binomial_result(), file, row.names = FALSE)
-    }
-  )
-  
-  #download as HTML plot
-  output$downloadPlot_BC <- downloadHandler(
-    filename = function() {
-      paste("plot_Binomial", Sys.Date(), ".html", sep = "")
-    },
-    content = function(file) {
-      data_to_plot <- data_binomial_result()  # This should be your reactive data source
-      
-      if (input$PC_plot == "2D") {
-        p <- plot_ly(data = data_to_plot, x = ~X1, y = ~X2, color = ~cluster, type = "scatter", mode = "markers", marker = list(size = 10)) %>%
-          layout(title = "2D Binomial Clustering", xaxis = list(title = input$inSelect_BC), yaxis = list(title = input$inSelect2_BC))
-      } else {
-        p <- plot_ly(data = data_to_plot, x = ~X1, y = ~X2, z = ~X3, color = ~cluster, type = "scatter3d", mode = "markers", marker = list(size = 10)) %>%
-          layout(title = "3D Binomial Clustering", scene = list(xaxis = list(title = input$inSelect_BC), yaxis = list(title = input$inSelect2_BC), zaxis = list(title = input$inSelect3_BC)))
-      }
-      
-      plotly_built <- plotly::plotly_build(p)  # Build the plotly object
-      htmlwidgets::saveWidget(plotly_built, file)
-    }
-  )
-  
-  #----------------------------------------------------------------------------------------------
   # Poisson
   data_poisson_result <- reactive({
     data_input <- df() 
@@ -1207,51 +1113,40 @@ output$anova_results <- renderTable({
       
       # Create HTML content with dropdown to select plots
       html_content <- "
-<html>
-<head>
-  <script>
-    function showPlot(plotId) {
-      var plots = document.getElementsByClassName('plot');
-      for (var i = 0; i < plots.length; i++) {
-        plots[i].style.display = 'none';
-      }
-      document.getElementById(plotId).style.display = 'block';
-    }
-  </script>
-</head>
-<body>
-  <select id='plotSelect' onchange='showPlot(this.value)'>"
-      
-      for (i in 1:length(plot_files)) {
-        html_content <- paste0(html_content, "<option value='plot", i, "'>", plot_names[[i]], "</option>")
-      }
-      
-      html_content <- paste0(html_content, "
-  </select>")
-      for (i in 1:length(plot_files)) {
-        html_content <- paste0(html_content, "<div id='plot", i, "' class='plot'", if(i == 1) " style='display: block;'" else " style='display: none;'", "><iframe src='", plot_files[[i]], "' style='width: 100%; height: 100vh;'></iframe></div>"
-        )
-      }
-      
-      # Close HTML content
-      html_content <- paste0(html_content, "
-</body>
-</html>
-")
+        <html>
+        <head>
+        <script>
+            function showPlot(plotId) {
+            var plots = document.getElementsByClassName('plot');
+            for (var i = 0; i < plots.length; i++) {
+                plots[i].style.display = 'none';
+            }
+            document.getElementById(plotId).style.display = 'block';
+            }
+        </script>
+        </head>
+        <body>
+        <select id='plotSelect' onchange='showPlot(this.value)'>"
+            
+            for (i in 1:length(plot_files)) {
+                html_content <- paste0(html_content, "<option value='plot", i, "'>", plot_names[[i]], "</option>")
+            }
+            
+            html_content <- paste0(html_content, "
+        </select>")
+            for (i in 1:length(plot_files)) {
+                html_content <- paste0(html_content, "<div id='plot", i, "' class='plot'", if(i == 1) " style='display: block;'" else " style='display: none;'", "><iframe src='", plot_files[[i]], "' style='width: 100%; height: 100vh;'></iframe></div>"
+                )
+            }
+            
+            # Close HTML content
+            html_content <- paste0(html_content, "
+        </body>
+        </html>
+        ")
       
       # Write HTML content to file
       writeLines(html_content, file)
-      
-      
-      # Combine plots into a single plot
-      # if (length(plots) >= 2) {
-      #   combined_plot <- plotly::subplot(plots[[1]], plots[[2]], nrows = 2, shareX = TRUE, shareY = TRUE)
-      # } else {
-      #   combined_plot <- plots[[1]]
-      # }
-      
-      # plotly_built <- plotly::plotly_build(combined_plot)
-      # htmlwidgets::saveWidget(plotly_built, file)
       
     }
   )
@@ -1263,12 +1158,7 @@ output$anova_results <- renderTable({
     # Here is where we update language in session
     shiny.i18n::update_lang(session, input$selected_language)
   })
-  
-#   inputVal <-
-#     InputValidator$new()
-#   inputVal$add_rule("df_upload_file", sv_required(message = "Upload a file is required"))
-#   inputVal$enable()
-  
+    
   ########################################
   # Data Viewer
   #
@@ -1529,7 +1419,6 @@ output$anova_results <- renderTable({
         ) %>%
           reduce(left_join, by = "Varible")
       }
-    # print(final_dist_n_method)
 
     final_dist_n_method
   })
@@ -1708,11 +1597,6 @@ output$anova_results <- renderTable({
         .
       )
   })
-
-      # Render the reactive output as a table
-    # output$compareResults <- renderDataTable({
-    #     rct_compare_ls()  # This calls the reactive function to get the data frame
-    # })
 
     output$compareResults <- DT::renderDataTable({
         # Your data frame
@@ -1944,7 +1828,8 @@ rct_gg_post_hoc_interactive <- reactive({
           }
           
           showtext_auto()
-          
+          # pairwise_comparison is a sub function of ggbetweenstats function. this function will do
+          # the pairwise p-value comparison
           mpc_df <- pairwise_comparisons(
             data            = y,
             x               = Treatment,
@@ -1955,14 +1840,13 @@ rct_gg_post_hoc_interactive <- reactive({
               analysis_method
             )
           )
-        #   print(mpc_df$group1)
-        #   print(mpc_df$group2)
-        #   print(mpc_df$p.value)
+
           Group1_global <<- mpc_df$group1
           Group2_global <<- mpc_df$group2
           p_values_rounded <- round(mpc_df$p.value, 4)
           p_values_grid_global <<- p_values_rounded
-
+          # ggbetweenstats function is the part we do the calculation of annotations,
+          # we try to extract data from the return object of this function
           test_results <-ggbetweenstats(
             data = y,
             x = Treatment,
@@ -1995,16 +1879,13 @@ rct_gg_post_hoc_interactive <- reactive({
             ggplot.component = theme(text = element_text(family = "wqy-microhei")),
             output = "object"
           )
-            # Print the test results for annotation
-            # print(str(test_results$labels$subtitle))
+
             # Your string
             result_string <- test_results$labels$subtitle
-            # print(str(result_string))
+
             # Convert language objects to strings
             result_list_strings <- lapply(result_string, function(x) deparse(x))
 
-            # print(result_list_strings[[5]])
-            # print(result_list_strings[[6]])
             # Regular expression to extract the number after '==' for F(wetch)
             f_wetch <- sub('.*== "\\s*([^"]+)"', '\\1', result_list_strings[[2]])
             p_value <- sub('.*== "\\s*([^"]+)"', '\\1', result_list_strings[[3]])
@@ -2012,12 +1893,7 @@ rct_gg_post_hoc_interactive <- reactive({
             obs <- sub('.*== "\\s*([^"]+)"', '\\1', result_list_strings[[7]])
             CI_first <- sub('.*\\* "\\s*([^"]+)"', '\\1', result_list_strings[[5]])
             CI_second <- sub('^"([0-9.]+)".*$', '\\1', result_list_strings[[6]])
-            # print(CI_first)
-            # print(CI_second)
-            # print(f_wetch)
-            # print(p_value)
-            # print(omega)
-            # print(obs)
+            # IMPORTANT: assign the extracted variable to the global variable
             f_wetch_global <<- f_wetch
             p_value_global <<- p_value
             omega_global <<- omega
@@ -2097,8 +1973,6 @@ rct_gg_post_hoc_interactive <- reactive({
         )
       }
     )
-#==============================================ANOVA PAIRWISE======================================================
-
 }
 )
 
