@@ -1,5 +1,5 @@
 # SOCR Clustering Calculator: Latest Edition
-Author: Yanghe Liu (yanghel@umich.edu)
+
 ## Overview
 
 The SOCR Clustering Calculator is a comprehensive online tool designed to facilitate clustering calculations, output clustering results, generate plots, and perform ANOVA pairwise Comparison. It's tailored for both beginners and advanced users in data analysis.
@@ -73,6 +73,5 @@ This section introduces few parts that can be improved in the future
 ### Decision Tree Clustering:
 1. Decision Tree Clustering method doesn't have a proper HTML downloading function for now. The future developers should review the code and add a interactive plot downloading function for this.
 
-## Last Words
-
-The SOCR Clustering Calculator has been a fascinating and enjoyable project to work on! We wish all future developers and contributors the best of luck in their coding endeavors. May this project continue to grow and evolve, offering valuable tools and insights to its users. 
+# Credits
+Authors: Yanghe Liu, [SOCR Team](https://www.socr.umich.edu/people/).
